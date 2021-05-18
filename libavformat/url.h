@@ -30,10 +30,48 @@
 #include "libavutil/dict.h"
 #include "libavutil/log.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
+
 #define URL_PROTOCOL_FLAG_NESTED_SCHEME 1 /*< The protocol name can be the first part of a nested protocol scheme */
 #define URL_PROTOCOL_FLAG_NETWORK       2 /*< The protocol uses network */
 
+typedef struct FILEMY
+{
+    int isEncrypted;
+	int64_t filesize;
+	int64_t EncrypSize;
+	int64_t FileOffset;
+}FILEMY;
+
+//extern const AVClass ffurl_context_class;
+
+typedef struct HdyjFileExt
+{
+	char symbol[5];
+	char guid[20];
+	char key[16];
+	//char usb_Serial[25];
+	int orgfile_size;
+	int encfile_size;
+	int encinfo;
+}HdyjFileExt;
+
+
+#ifdef DEFINE_GLOBALS
+#define EXTERN
+#else
+#define EXTERN extern
+#endif
+
+
+
+extern unsigned char DecryptKey[16];
 extern const AVClass ffurl_context_class;
+extern FILEMY* file_info;
+
+//FILE* playerklog;
+
 
 typedef struct URLContext {
     const AVClass *av_class;    /**< information for av_log(). Set by url_open(). */
@@ -48,7 +86,6 @@ typedef struct URLContext {
     int64_t rw_timeout;         /**< maximum time to wait for (network) read/write operation completion, in mcs */
     const char *protocol_whitelist;
     const char *protocol_blacklist;
-    int min_packet_size;        /**< if non zero, the stream is packetized with this min packet size */
 } URLContext;
 
 typedef struct URLProtocol {
@@ -339,5 +376,10 @@ const AVClass *ff_urlcontext_child_class_next(const AVClass *prev);
  */
 const URLProtocol **ffurl_get_protocols(const char *whitelist,
                                         const char *blacklist);
+
+
+int set_file_info(FILEMY* file_in);
+int set_file_key(char* key ,int size);
+
 
 #endif /* AVFORMAT_URL_H */
